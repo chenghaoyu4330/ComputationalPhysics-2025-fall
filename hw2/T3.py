@@ -1,8 +1,11 @@
 # Runge效应
 import numpy as np
+import sympy as sp
 import matplotlib.pyplot as plt
 from T2 import lagrange_interpolation
 
+
+# 生成 Chebyshev 节点
 def Chebyshev_nodes(a, b, n):
     """
     生成区间 [a, b] 上的 Chebyshev 节点
@@ -17,6 +20,8 @@ def Chebyshev_nodes(a, b, n):
         nodes.append(x_k)
     return nodes
 
+
+# Chebyshev 多项式插值
 def Chebyshev_poly_interpolation(f, a, b, n, x):
     """
     使用 Chebyshev 近似进行函数计算：f(x) = -c0/2 + Σ (ck * Tk(x))，其中 Tk(x) 是第 k 个 Chebyshev 多项式，ck 是对应的系数
@@ -59,14 +64,16 @@ def Chebyshev_poly_interpolation(f, a, b, n, x):
         results.append(fx)
     return results
 
+
 # 三次样条函数插值
-def cubic_spline_interpolation(x_values, y_values, x):
+def cubic_spline_interpolation(x_values, y_values, x=None, need_piecewise_expression=False):
     """
     使用三次样条插值法计算在给定点处的插值
     :param x_values: 已知数据点的 x 坐标
     :param y_values: 已知数据点的 y 坐标
     :param x: 需要插值的点列表
-    :return: 在指定点处的插值结果列表
+    :param need_piecewise_expression: 是否返回分段函数表达式
+    :return: 在指定点处的插值结果列表或分段函数表达式
     """
     n = len(x_values)
     if n != len(y_values):
@@ -92,22 +99,42 @@ def cubic_spline_interpolation(x_values, y_values, x):
     m[1:n-1] = np.linalg.solve(A, b)
 
     # 计算插值结果
-    results = []
-    for xi in x:
-        # 找到xi所在的区间[xi, xi+1]
+    if x is not None:
+        results = []
+        for xi in x:
+            # 找到xi所在的区间[xi, xi+1]
+            for i in range(n - 1):
+                if x_values[i] <= xi <= x_values[i + 1]:
+                    break
+            hi = h[i]
+            Ai = -m[i] / (6 * hi)
+            Bi = m[i + 1] / (6 * hi)
+            Ci = (y_values[i + 1] - y_values[i]) / hi - hi * (m[i + 1] - m[i]) / 6
+            Di = y_values[i] - m[i] * hi ** 2 / 6
+            dxi = xi - x_values[i]
+            dxi1 = xi - x_values[i + 1]
+            fx = Ai * dxi1 ** 3 + Bi * dxi ** 3 + Ci * dxi + Di
+            results.append(fx)
+
+        return results
+
+    if need_piecewise_expression:
+        # 返回分段函数表达式
+        piecewise_expressions = []
+        sym = 't'
+        x_sym = sp.symbols(sym)
         for i in range(n - 1):
-            if x_values[i] <= xi <= x_values[i + 1]:
-                break
-        hi = h[i]
-        Ai = -m[i] / (6 * hi)
-        Bi = m[i+1] / (6 * hi)
-        Ci = (y_values[i + 1] - y_values[i]) / hi - hi * (m[i + 1] - m[i]) / 6
-        Di = y_values[i] - m[i] * hi**2 / 6
-        dxi = xi - x_values[i]
-        dxi1 = xi - x_values[i + 1]
-        fx = Ai * dxi1**3 + Bi * dxi**3 + Ci * dxi + Di
-        results.append(fx)
-    return results
+            hi = h[i]
+            Ai = -m[i] / (6 * hi)
+            Bi = m[i + 1] / (6 * hi)
+            Ci = (y_values[i + 1] - y_values[i]) / hi - hi * (m[i + 1] - m[i]) / 6
+            Di = y_values[i] - m[i] * hi ** 2 / 6
+            dxi = x_sym - x_values[i]
+            dxi1 = x_sym - x_values[i + 1]
+            fx = Ai * dxi1 ** 3 + Bi * dxi ** 3 + Ci * dxi + Di
+            print(f"S_{i}({sym}) = {sp.simplify(fx).evalf(6)} for {sym} in [{x_values[i]}, {x_values[i + 1]}]")
+            piecewise_expressions.append((sp.simplify(fx), x_values[i], x_values[i + 1]))
+        return piecewise_expressions
 
 
 # 题目测试
