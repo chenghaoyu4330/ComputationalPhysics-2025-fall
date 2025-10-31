@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from T3 import cubic_spline_interpolation
 
-# 我们将尝试用三次样条函数平滑地连接若干个二维空间中已知的点。考虑二维空间的一系列点 (xi, yi), i = 0, 1, ···, n。我们现在希望按照顺序（由 0 到 n）将它们平滑地连接起来。一个方便的办法是引入一个连续参数 t ∈ [0, n]，取节点为ti = 0, 1, ···, n，然后分别建立两个样条函数：S∆(X; t) 和 S∆(Y ; t)，它们分别满足S∆(X; t) = xi; S∆(Y, t) = yi。这两个样条函数可以看作是 (x(t), y(t)) 的内插近似。因此绘制参数曲线 (x(t), y(t)) 的问题就化为求出两个样条函数并将它们画出的问题。
 
 def plot_spline_curve(points, t_points, num_points=1000):
     """
@@ -33,7 +32,7 @@ def plot_spline_curve(points, t_points, num_points=1000):
 
 # 题目测试
 if __name__ == "__main__":
-    # 第二题，选取 ϕ = tπ/4, t = 0, 1, 2, 3, 4, 5, 6, 7, 8 这 9 个点，给出 xt = r(ϕ) cos ϕ 和 yt = r(ϕ) sin ϕ 的数值。将这些数值作为精确的数值列在一个表里。我们考虑的函数是著名的心形线（cardioid）。它的极坐标方程是r(ϕ) = 2a(1 − cos ϕ) = 1 − cos ϕ，为了方便起见我们取了 2a = 1。给出过这 9 个点的两个三次样条函数 S∆(X; t) 和 S∆(Y ; t)。
+    # 第二题
     print('第二题\n输出中的小数保留6位有效数字。')
     a = 0.5
     t_points = np.arange(0, 9)
