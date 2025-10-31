@@ -103,9 +103,10 @@ if __name__ == "__main__":
     rational_results = rational_function_interpolation(x_values, y_values, x)
     lagrange_results = lagrange_interpolation(x_values, y_values, x)
 
-    print(f'有理分式内插法在 x=1.57 处的插值结果: {rational_results[np.searchsorted(x, 1.57)]:.6f}')
-    print(f'拉格朗日插值法在 x=1.57 处的插值结果: {lagrange_results[np.searchsorted(x, 1.57)]:.6f}')
-    print(f'真实值 tan(1.57) = {func(1.57):.6f}')
+    # print(f'有理分式内插法在 x=1.57 处的插值结果: {rational_results[np.searchsorted(x, 1.57)]:.6f}')
+    # print(f'拉格朗日插值法在 x=1.57 处的插值结果: {lagrange_results[np.searchsorted(x, 1.57)]:.6f}')
+    # print(f'真实值 tan(1.57) = {func(1.57):.6f}')
+
     # 绘制插值结果的对比图,取前500个点
     dots = 500
     plt.figure(figsize=(10, 6))
