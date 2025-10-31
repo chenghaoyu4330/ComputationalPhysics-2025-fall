@@ -38,8 +38,8 @@ def Chebyshev_poly_interpolation(f, a, b, n, x):
     # 计算节点处的函数值
     y_values = [f(xi) for xi in nodes]
 
-    # 使用Clenshaw算法计算Chebyshev展开：对于Chebyshev多项式Tk(x)，满足 Tk+1(x) = 2xTk(x) - Tk-1(x)，则构造新函数bk(x)，满足：bn+1(x) = 0, bn+2(x) = 0, bk(x) = 2x * bk+1(x) - bk+2(x) + ck，最终f(x) = 0.5 * c0 + x * b1(x) - b2(x)，因此需要计算ck，bk(x)
-    # 计算系数ck
+    # 使用Clenshaw算法计算Chebyshev展开：对于Chebyshev多项式Tk(x)，满足 Tk+1(x) = 2xTk(x) - Tk-1(x)，则构造新函数bk(x)，满足：bn+1(x) = 0,
+    # bn+2(x) = 0, bk(x) = 2x * bk+1(x) - bk+2(x) + ck，最终f(x) = c0 + x * b1(x) - b2(x)，因此需要计算ck，bk(x) 计算系数ck
     c = []
     for k in range(n):
         sum_ck = 0
@@ -81,7 +81,9 @@ def cubic_spline_interpolation(x_values, y_values, x=None, need_piecewise_expres
     if n <= 2:
         raise ValueError("至少需要三个数据点进行三次样条插值")
 
-    # 定义区间长度hi，以及构造线性方程组求解三次样条函数的矩m（二阶导数），其中mi满足μi * m_(i-1) + 2 * mi + λi * m_(i+1) = di，i = 1, 2, ..., n-2，其中μi = h_(i-1) / (hi + h_(i-1))，λi = hi / (hi + h_(i-1))，di = 6 * (y_(i+1) / h_(i-1)*(h_(i-1)+hi) - yi / hi*h_(i-1) + y_(i-1) / h_(i-1)*(h_(i-1)+hi))
+    # 定义区间长度hi，以及构造线性方程组求解三次样条函数的矩m（二阶导数），其中mi满足μi * m_(i-1) + 2 * mi + λi * m_(i+1) = di，i = 1, 2, ..., n-2，其中μi =
+    # h_(i-1) / (hi + h_(i-1))，λi = hi / (hi + h_(i-1))，di = 6 * (y_(i+1) / h_(i-1)*(h_(i-1)+hi) - yi / hi*h_(i-1) +
+    # y_(i-1) / h_(i-1)*(h_(i-1)+hi))
     h = [x_values[i + 1] - x_values[i] for i in range(n - 1)]
     A = np.zeros((n-2, n-2))
     b = np.zeros(n-2)

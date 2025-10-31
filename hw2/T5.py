@@ -90,19 +90,21 @@ def matrix_inverse(M):
     return M_inv
 
 
-def weighted_poly_fit(x, y, sigma, degree):
+def weighted_poly_fit(x, y, degree, sigma=None):
     """
     加权最小二乘法多项式拟合
     :param x: 自变量数据点
     :param y: 因变量数据点
-    :param sigma: 每个数据点的标准差（误差）
     :param degree: 多项式阶数
+    :param sigma: 每个数据点的标准差（误差）
     :return:
         coeffs: 拟合系数 [a0, a1, ..., am]
         coeffs_err: 系数误差 [σ_a0, σ_a1, ..., σ_am]
     """
-    n = len(x)
     m = degree  # 多项式阶数
+
+    if sigma is None:
+        sigma = np.ones_like(y)  # 如果未提供sigma，则假设所有点的误差相等
 
     # 构建矩阵M和向量b
     M = np.zeros((m + 1, m + 1))
@@ -185,7 +187,7 @@ if __name__ == "__main__":
 
     # 分别进行1次、2次、3次多项式拟合
     for degree in degrees:
-        coeffs, coeffs_err = weighted_poly_fit(x, y, sigma, degree)
+        coeffs, coeffs_err = weighted_poly_fit(x, y, degree, sigma)
         coeffs_list.append(coeffs)
         print_results(degree, coeffs, coeffs_err)
 
