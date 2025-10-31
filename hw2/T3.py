@@ -3,6 +3,7 @@ import numpy as np
 import sympy as sp
 import matplotlib.pyplot as plt
 from T2 import lagrange_interpolation
+from T1 import gaussian_elimination
 
 
 # 生成 Chebyshev 节点
@@ -24,7 +25,7 @@ def Chebyshev_nodes(a, b, n):
 # Chebyshev 多项式插值
 def Chebyshev_poly_interpolation(f, a, b, n, x):
     """
-    使用 Chebyshev 近似进行函数计算：f(x) = -c0/2 + Σ (ck * Tk(x))，其中 Tk(x) 是第 k 个 Chebyshev 多项式，ck 是对应的系数
+    使用 Chebyshev 多项式进行函数近似计算
     :param f: 目标函数
     :param a: 区间起点
     :param b: 区间终点
@@ -98,7 +99,8 @@ def cubic_spline_interpolation(x_values, y_values, x=None, need_piecewise_expres
         b[i - 1] = 6 * ((y_values[i + 1] / h[i]) - (y_values[i] * (h[i - 1] + h[i]) / (h[i - 1] * h[i])) + (y_values[i - 1] / h[i - 1])) / (h[i - 1] + h[i])
 
     # 求解线性方程组
-    m[1:n-1] = np.linalg.solve(A, b)
+    # m[1:n-1] = np.linalg.solve(A, b)
+    m[1:n-1] = gaussian_elimination(A, b)
 
     # 计算插值结果
     if x is not None:
