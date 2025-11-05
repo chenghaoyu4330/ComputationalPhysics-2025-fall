@@ -44,7 +44,7 @@ def Chebyshev_poly_interpolation(f, a, b, n, x):
     c = []
     for k in range(n):
         sum_ck = 0
-        for j in range(1, n):
+        for j in range(0, n):
             sum_ck += y_values[j] * np.cos(k * (2 * j + 1) * np.pi / (2 * n))
         ck = (2 / n) * sum_ck
         # 特殊处理c0
