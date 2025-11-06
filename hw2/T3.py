@@ -296,11 +296,14 @@ if __name__ == "__main__":
     # 第四题
     print("\n第四题：三次样条插值法")
 
-    # 需要插值的点，这次利用 61 个点的三次样条函数
-    x_interp_spline = np.linspace(-1, 1, 61)
+    # 需要插值的点，这次利用 121 个点的三次样条函数
+    x_interp_spline = np.linspace(-1, 1, 121)
 
-    # 三次样条插值，构造样条函数的节点仍然是均匀分布的21个节点
-    y_interp_spline = cubic_spline_interpolation(x_values, y_values, x_interp_spline)
+    x_values_61 = np.linspace(-1, 1, 61)  # 构造样条函数的节点是均匀分布的61个节点
+    y_values_61 = func(x_values_61)
+
+    # 三次样条插值，构造样条函数的节点是均匀分布的61个节点
+    y_interp_spline = cubic_spline_interpolation(x_values_61, y_values_61, x_interp_spline)
 
     # 真实值
     y_true_spline = func(np.array(x_interp_spline))
@@ -314,7 +317,7 @@ if __name__ == "__main__":
     plt.figure(figsize=(10, 6))
     x_plot_spline = np.array(x_interp_spline)
     y_plot_true_spline = func(x_plot_spline)
-    y_plot_spline = cubic_spline_interpolation(x_values, y_values, x_plot_spline)
+    y_plot_spline = cubic_spline_interpolation(x_values_61, y_values_61, x_plot_spline)
     plt.plot(x_plot_spline, y_plot_true_spline, label='True Function', linestyle='-')
     plt.plot(x_plot_spline, y_plot_spline, label='Cubic Spline Interpolation', linestyle='--')
     plt.scatter(x_interp_spline, y_true_spline, color='red', s=10, label='Interpolation Points')
