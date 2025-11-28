@@ -11,8 +11,7 @@ def exact_integral(k):
     return float(integral)
 
 def simpsons_integral(func, a, b, n, k):
-    if n % 2 == 0:
-        n += 1  # Simpson's rule requires an odd number of points
+    n = 2*n + 1  # 题目表述不清楚，实际上是这个意思
     x = np.linspace(a, b, n)
     y = func(x, k)
     h = (b - a) / (n - 1)

@@ -1,7 +1,4 @@
 import numpy as np
-import scipy.integrate as spi
-import sympy as sp
-import matplotlib.pyplot as plt
 from scipy.special import roots_legendre
 
 def f(x):
@@ -17,8 +14,7 @@ def trapezoidal_rule(func, a, b, n):
 
 # 辛普森法则
 def simpsons_rule(func, a, b, n):
-    if n % 2 == 0:
-        n += 1  # Simpson's rule requires an odd number of points
+    n = 2*n+1  # 题目表述不清楚，实际上是这个意思
     x = np.linspace(a, b, n)
     y = func(x)
     h = (b - a) / (n - 1)
