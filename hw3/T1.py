@@ -79,6 +79,7 @@ if __name__ == "__main__":
 
     # 绘图，同时把插值的点也画出来
     for ni in n:
+        ni = ni + 1  # n阶插值需要n+1个节点
         plt.figure(figsize=(12, 8))
         f_interp = Chebyshev_poly_interpolation(f, a, b, ni, x_mapped)
         plt.plot(x_vals, f_interp, label=f'Chebyshev Interpolation n={ni}')

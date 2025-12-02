@@ -11,11 +11,10 @@ def exact_integral(k):
     return float(integral)
 
 def simpsons_integral(func, a, b, n, k):
-    n = 2*n + 1  # 题目表述不清楚，实际上是这个意思
-    x = np.linspace(a, b, n)
+    x = np.linspace(a, b, 2*n+1)
     y = func(x, k)
-    h = (b - a) / (n - 1)
-    integral = (h / 3) * (y[0] + 4 * np.sum(y[1:n-1:2]) + 2 * np.sum(y[2:n-2:2]) + y[n-1])
+    h = (b - a) / (2 * n)
+    integral = (h / 3) * (y[0] + 4 * np.sum(y[1:(2*n):2]) + 2 * np.sum(y[2:(2*n-1):2]) + y[2*n])
     return integral
 
 def I0_I2_J1(k, h):
