@@ -33,18 +33,14 @@ def solve_wave_equation(Nx, Ny, T_max, dt, flag_use_lambda=False, lambda_param=1
 
     # 初始条件: u(x,y,0)
     u_prev[:, :] = np.sin(np.pi * X) * np.sin(2 * np.pi * Y)
-
-    # 第一步 (n=0 到 n=1) 使用 u_t(0) = 0
-    rx2 = (dt / dx)**2
-    ry2 = (dt / dy)**2
-
     u_nm1 = u_prev.copy() # u^{n-1}
+    u_n = u_nm1.copy() # u^{n}
 
-    # 计算 u^1
+    # 计算 u^1，使用 u_t(0) = 0
     u_nm1_xx = u_nm1[2:, 1:-1] - 2*u_nm1[1:-1, 1:-1] + u_nm1[:-2, 1:-1]
     u_nm1_yy = u_nm1[1:-1, 2:] - 2*u_nm1[1:-1, 1:-1] + u_nm1[1:-1, :-2]
-
-    u_n = u_nm1.copy()
+    rx2 = (dt / dx)**2
+    ry2 = (dt / dy)**2
     u_n[1:-1, 1:-1] = u_nm1[1:-1, 1:-1] + 0.5 * (rx2 * u_nm1_xx + ry2 * u_nm1_yy)
 
     # 记录需要保存的时刻 (使用最接近的数值时刻)
@@ -130,21 +126,56 @@ def plot_comparison(X, Y, history, flag_stable_test=False, lambda_param=None):
 def run_stability_test(Nx, Ny, T_max, dt, lambda_values=None):
     """
     运行稳定性测试
-    :param lambda_values: 要测试的 lambda 值列表。如果为 None，则默认为 [2.0, 0.8]
     """
     if lambda_values is None:
         lambda_values = [2.0, 0.8]
 
     print("\n--- 稳定性测试 ---")
 
+    print("**测试不同时间步长dt下的数值稳定性**")
     for lam in lambda_values:
         X, Y, history, frames, success, t_final = solve_wave_equation(Nx, Ny, T_max, dt, True, lam)
+        
+        if history:
+            print(f"  -> 误差分析 (lambda={lam}):")
+            for h in history:
+                t_val = h['t']
+                u_num = h['u']
+                u_ana = analytical_solution(X, Y, t_val)
+                max_err = np.max(np.abs(u_num - u_ana))
+                mse = np.mean((u_num - u_ana)**2)
+                print(f"     t={t_val:.2f}: Max Error={max_err:.4e}, MSE={mse:.4e}")
+
         if success:
-            print(f"lambda = {lam}: 计算稳定，结束时刻 t={t_final:.2f}")
-            plot_comparison(X, Y, history, True, lam)
+            print(f"计算稳定，结束时刻 t={t_final:.2f}")
+            # plot_comparison(X, Y, history, True, lam)
         else:
-            print(f"lambda = {lam}: 计算发散，失稳时刻 t={t_final:.2f}")
-            plot_comparison(X, Y, history, True, lam)
+            print(f"计算发散，失稳时刻 t={t_final:.2f}")
+            # plot_comparison(X, Y, history, True, lam)
+
+    print("\n**测试不同空间网格划分下的数值稳定性**:")
+    grids = [(50, 50), (100, 100), (150, 150)]
+    for Nx_test, Ny_test in grids:
+        X, Y, history, frames, success, t_final = solve_wave_equation(Nx_test, Ny_test, T_max, dt, False)
+        
+        if history:
+            print()
+            print(f"  -> 误差分析 (Nx={Nx_test}, Ny={Ny_test}, dt={dt}):")
+            for h in history:
+                t_val = h['t']
+                u_num = h['u']
+                u_ana = analytical_solution(X, Y, t_val)
+                max_err = np.max(np.abs(u_num - u_ana))
+                mse = np.mean((u_num - u_ana)**2)
+                print(f"     t={t_val:.2f}: Max Error={max_err:.4e}, MSE={mse:.4e}")
+
+        if success:
+            print(f"计算稳定，结束时刻 t={t_final:.2f}")
+            # plot_comparison(X, Y, history, True, f"{Nx_test}_{Ny_test}")
+        else:
+            print(f"计算发散，失稳时刻 t={t_final:.2f}")
+            # plot_comparison(X, Y, history, True, f"{Nx_test}_{Ny_test}")
+    print("--- 稳定性测试结束 ---\n")
 
 def create_animation(X, Y, frames):
     print("\n正在生成动画...")
@@ -172,14 +203,22 @@ def create_animation(X, Y, frames):
         print(f"保存动画时出错: {e}")
 
 if __name__ == "__main__":
-    # (b) 数值解与解析解对比 (采用 CFL 极限 lambda=1.0)
-    Nx, Ny = 100, 100
-    T_max = 5.0
-    dt = 0.001
-    lambda_param = 1.0
-    lambda_values = [3.0, 2.0, 1.01, 0.8]
+    Nx, Ny = 100, 100 # 网格划分数
+    T_max = 5.0 # 最大模拟时间
+    dt = 0.001 # 时间步长
+    lambda_param = 1.0 # 主模拟的 lambda 值
+    lambda_values = [3.0, 2.0, 1.01, 0.99, 0.8] # 稳定性测试的 lambda 值列表
     print(f"\n(b) 数值求解并与解析解对比 (lambda={lambda_param})...")
     X, Y, history, frames, success, _ = solve_wave_equation(Nx, Ny, T_max, dt, False, lambda_param)
+    if history:
+            print(f"  -> 误差分析:")
+            for h in history:
+                t_val = h['t']
+                u_num = h['u']
+                u_ana = analytical_solution(X, Y, t_val)
+                max_err = np.max(np.abs(u_num - u_ana))
+                mse = np.mean((u_num - u_ana)**2)
+                print(f"     t={t_val:.2f}: Max Error={max_err:.4e}, MSE={mse:.4e}")
 
     if success:
         plot_comparison(X, Y, history)
