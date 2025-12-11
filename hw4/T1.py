@@ -8,13 +8,66 @@ def get_matrix():
         [0, 0, -1, 4]
     ], dtype=float)
 
+def householder_qr(A: np.ndarray):
+    """
+    使用Householder变换进行QR分解
+    :param A: 输入矩阵(m*n, m≥n, 列满秩)
+    :return: 正交矩阵Q(m*m), 上三角矩阵R(m*n)
+    """
+    # 复制矩阵并转换为浮点型，避免原矩阵被修改
+    m, n = A.shape
+    R = A.copy().astype(float)
+    # 初始化Q为m阶单位矩阵
+    Q = np.eye(m, dtype=float)
+
+    # 遍历每一列
+    for k in range(n):
+        # 提取当前列的子向量（从第k行到最后一行）
+        x = R[k:, k].copy()
+        # 计算x的2-范数
+        norm_x = np.linalg.norm(x, ord=2)
+        # 如果范数为0，说明该列已经是0，跳过
+        if norm_x == 0:
+            continue
+
+        # 构造单位向量e1（长度和x一致）
+        e1 = np.zeros_like(x)
+        e1[0] = 1.0
+        # 选择符号，避免数值抵消（和x[0]同号）
+        sign = np.sign(x[0]) if x[0] != 0 else 1.0
+        # 构造Householder向量v并归一化
+        v = x + sign * norm_x * e1
+        v /= np.linalg.norm(v, ord=2)
+
+        # 构造m-k阶的Householder矩阵H
+        h_size = len(v)
+        H = np.eye(h_size, dtype=float) - 2.0 * np.outer(v, v)
+
+        # 步骤1：将Householder变换应用到R的子矩阵（左乘H）
+        R[k:, k:] = H @ R[k:, k:]
+
+        # 步骤2：构造m阶的完整Householder矩阵（嵌入到单位矩阵的右下角）
+        H_full = np.eye(m, dtype=float)
+        H_full[k:, k:] = H
+
+        # 步骤3：将完整的Householder矩阵应用到Q（右乘H_full）
+        Q = Q @ H_full
+
+    # 对于n×n矩阵，R的下三角部分（除了上三角）可以置0，避免数值误差导致的小值
+    for i in range(m):
+        for j in range(n):
+            if i > j:
+                R[i, j] = 0.0
+
+    return Q, R
+
 def qr_algorithm(A, max_iter=50, tol=1e-6):
     n = A.shape[0]
     Ak = A.copy()
     print(f"初始矩阵:\n{Ak}")
     
     for k in range(1, max_iter + 1):
-        Q, R = np.linalg.qr(Ak)
+        Q, R = householder_qr(Ak)
         Ak = R @ Q
         
         if k % 5 == 0:

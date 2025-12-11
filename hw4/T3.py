@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-# from matplotlib import rc
 
 # 参数设置
 L = 2.0
@@ -9,7 +8,7 @@ N = 200
 dx = L / N
 delta = 0.022
 delta_sq = delta**2
-t_max = 4.0 # 模拟足够长的时间以观察孤立子
+t_max = 6.0 # 模拟足够长的时间以观察孤立子
 dt = 1e-4   # 稳定性要求
 n_steps = int(t_max / dt)
 
@@ -19,15 +18,13 @@ x = np.linspace(0, L, N, endpoint=False)
 # 初始条件
 u0 = np.cos(np.pi * x)
 
-# 存储解的数组
-# Leapfrog格式只需要前一步、当前步和下一步
+# 存储解的数组，Leapfrog格式只需要前一步、当前步和下一步
 u_prev = np.copy(u0)
 u_curr = np.copy(u0)
 u_next = np.zeros_like(u0)
 
-# 第一步使用前向欧拉法（或RK2）启动Leapfrog
-# 方程: u_t = - (u u_x + delta^2 u_xxx)
-# 空间导数的有限差分
+# 第一步使用前向欧拉法（或RK2）启动Leapfrog，方程: u_t = - (u u_x + delta^2 u_xxx)
+# 使用空间导数的有限差分
 def compute_rhs(u):
     # 使用 np.roll 处理周期性边界条件
     # u_x 近似为 (u_{j+1} - u_{j-1}) / 2dx
@@ -58,12 +55,9 @@ frames.append(u_prev.copy())
 print(f"开始模拟: N={N}, dt={dt}, 总步数={n_steps}")
 
 for step in range(1, n_steps):
-    # Leapfrog 步进
-    # u^{n+1} = u^{n-1} + 2*dt * RHS(u^n)
+    # Leapfrog 步进：u^{n+1} = u^{n-1} + 2*dt * RHS(u^n)
     rhs = compute_rhs(u_curr)
     u_next = u_prev + 2 * dt * rhs
-    
-    # 稳定性滤波（可选，Leapfrog通常需要Robert-Asselin滤波来抑制计算模，但Zabusky-Kruskal原始论文未使用，此处保持原始格式）
     
     # 更新数组
     u_prev[:] = u_curr[:]
@@ -71,8 +65,6 @@ for step in range(1, n_steps):
     
     if step % save_interval == 0:
         frames.append(u_curr.copy())
-        if step % 1000 == 0:
-            print(f"步骤 {step}/{n_steps}, 最大u值: {np.max(u_curr):.4f}")
 
 print("模拟结束。")
 
@@ -83,7 +75,7 @@ ax.set_xlim(0, L)
 ax.set_ylim(-1.5, 3.0) # 孤立子会比初始的1.0更高
 ax.set_xlabel('x')
 ax.set_ylabel('u(x,t)')
-ax.set_title('KdV方程孤立子 (Zabusky-Kruskal格式)')
+ax.set_title('KdV Equation Solitons Evolution')
 time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
 
 def update(frame_idx):
