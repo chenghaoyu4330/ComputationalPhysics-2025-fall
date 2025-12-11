@@ -8,8 +8,8 @@ N = 200
 dx = L / N
 delta = 0.022
 delta_sq = delta**2
-t_max = 6.0 # 模拟足够长的时间以观察孤立子
-dt = 1e-4   # 稳定性要求
+t_max = 40.0 # 模拟足够长的时间以观察孤立子
+dt = 1e-4    # 稳定性要求
 n_steps = int(t_max / dt)
 
 # 网格设置
@@ -18,13 +18,11 @@ x = np.linspace(0, L, N, endpoint=False)
 # 初始条件
 u0 = np.cos(np.pi * x)
 
-# 存储解的数组，Leapfrog格式只需要前一步、当前步和下一步
-u_prev = np.copy(u0)
+# 存储解的数组
 u_curr = np.copy(u0)
-u_next = np.zeros_like(u0)
 
-# 第一步使用前向欧拉法（或RK2）启动Leapfrog，方程: u_t = - (u u_x + delta^2 u_xxx)
-# 使用空间导数的有限差分
+# 方程: u_t = - (u u_x + delta^2 u_xxx)
+# 使用差分法计算右端项
 def compute_rhs(u):
     # 使用 np.roll 处理周期性边界条件
     # u_x 近似为 (u_{j+1} - u_{j-1}) / 2dx
@@ -43,28 +41,29 @@ def compute_rhs(u):
     
     return -(nonlinear + dispersion)
 
-# t=1 的欧拉步
-rhs = compute_rhs(u_curr)
-u_curr = u_prev + dt * rhs
+# RK4 时间步进
+def rk4_step(u, dt):
+    k1 = compute_rhs(u)
+    k2 = compute_rhs(u + 0.5 * dt * k1)
+    k3 = compute_rhs(u + 0.5 * dt * k2)
+    k4 = compute_rhs(u + dt * k3)
+    return u + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
 
 # 存储动画帧
 frames = []
 save_interval = 100 # 每100步保存一次
-frames.append(u_prev.copy())
+frames.append(u_curr.copy())
 
 print(f"开始模拟: N={N}, dt={dt}, 总步数={n_steps}")
 
-for step in range(1, n_steps):
-    # Leapfrog 步进：u^{n+1} = u^{n-1} + 2*dt * RHS(u^n)
-    rhs = compute_rhs(u_curr)
-    u_next = u_prev + 2 * dt * rhs
-    
-    # 更新数组
-    u_prev[:] = u_curr[:]
-    u_curr[:] = u_next[:]
+for step in range(1, n_steps + 1):
+    u_curr = rk4_step(u_curr, dt)
     
     if step % save_interval == 0:
         frames.append(u_curr.copy())
+        if np.max(np.abs(u_curr)) > 10:
+             print(f"警告: 在 step={step} (t={step*dt:.2f}) 检测到发散！")
+             break
 
 print("模拟结束。")
 
